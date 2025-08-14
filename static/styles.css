@@ -1,0 +1,339 @@
+/* --- Variables y estilos base --- */
+:root {
+    --primary-color: #2563eb;
+    --primary-hover-color: #1d4ed8;
+    --background-color: #f3f4f6;
+    --card-background: #ffffff;
+    --text-color: #374151;
+    --heading-color: #1f2937;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --border-radius: 0.75rem;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
+    color: var(--text-color);
+}
+
+/* --- Barra de navegación --- */
+.navbar {
+    background-color: var(--card-background);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.user-greeting {
+    font-weight: 500;
+}
+
+.nav-link {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: var(--primary-color);
+}
+
+/* --- Contenido principal y Tarjeta --- */
+.main-content {
+    max-width: 500px; /* Reducimos el ancho para que el formulario se vea más compacto */
+    margin: 3rem auto;
+    padding: 0 1rem;
+}
+
+.card {
+    background-color: var(--card-background);
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.card-title {
+    text-align: center;
+    color: var(--heading-color);
+    margin-bottom: 2rem;
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+/* --- Elementos del formulario --- */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--heading-color);
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db; /* Un color de borde más suave */
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); /* Sombra de foco más suave */
+}
+
+/* --- Botones --- */
+.reserve-btn {
+    width: 100%;
+    background-color: var(--primary-color);
+    color: #ffffff;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.reserve-btn:hover {
+    background-color: var(--primary-hover-color);
+}
+
+.logout-btn {
+    background-color: #ef4444;
+    color: #ffffff;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: #dc2626;
+}
+
+/* --- Login & Register Page Styles --- */
+
+.login-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #f3f4f6; /* El mismo color de fondo que la página de citas */
+    padding: 1rem;
+}
+
+.login-form {
+    background-color: #ffffff;
+    padding: 2.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; /* Separación entre los elementos del formulario */
+}
+
+.login-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #1f2937;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-form input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.btn {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #2563eb;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+}
+
+.form-text {
+    text-align: center;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+}
+
+.link {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.link:hover {
+    text-decoration: underline;
+}
+
+/* --- Estilos de los mensajes de alerta --- */
+.alert-message {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-size: 0.875rem;
+    transition: opacity 0.5s ease;
+}
+
+.alert-success {
+    background-color: #d1fae5;
+    border: 1px solid #34d399;
+    color: #065f46;
+}
+
+.alert-error {
+    background-color: #fee2e2;
+    border: 1px solid #f87171;
+    color: #991b1b;
+}
+
+/* --- Botón de Registro --- */
+.btn-register {
+    background-color: #10b981; /* Un color verde diferente al de Tailwind para que elijas */
+    color: #ffffff;
+}
+
+.btn-register:hover {
+    background-color: #059669;
+}
+
+/* --- Estilos para la página de Mis Citas --- */
+.appointments-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+}
+
+.appointments-table th,
+.appointments-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb; /* Color de borde más suave */
+}
+
+.appointments-table th {
+    background-color: #f3f4f6; /* El mismo color del fondo principal */
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.appointments-table tr:last-child td {
+    border-bottom: none;
+}
+
+.cancel-btn {
+    background-color: #ef4444; /* Rojo para cancelar */
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.cancel-btn:hover {
+    background-color: #dc2626;
+}
+
+.empty-message {
+    text-align: center;
+    color: #6b7280;
+    font-style: italic;
+    padding: 2rem 0;
+}
+
+.flash-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #4caf50;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+.flash-message.show {
+    opacity: 1;
+}
+
+.reason-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.delete-reason-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.delete-reason-btn:hover {
+    background-color: #c0392b;
+}

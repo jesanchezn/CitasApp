@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendario de Citas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <h1 class="logo">Sistema de Citas</h1>
+        <div class="nav-links">
+            <span class="user-greeting">Hola, {{ full_name }}</span>
+            <a href="/users/my_appointments" class="nav-link">Mis citas</a>
+            <form action="/users/logout" method="get">
+                <button type="submit" class="logout-btn">Cerrar sesión</button>
+            </form>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="card">
+            <h2 class="card-title">Citas Disponibles</h2>
+
+            <div class="form-group">
+                <label for="calendar">Selecciona una fecha:</label>
+                <input type="date" id="calendar">
+            </div>
+
+            <div class="form-group">
+                <label for="time-select">Selecciona una hora:</label>
+                <select id="time-select">
+                    <option disabled selected>Selecciona una hora</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="reason-select">Motivo de la cita:</label>
+                <select id="reason-select" required>
+                    <option disabled selected>Selecciona un motivo</option>
+                </select>
+            </div>
+
+            <button id="reserve-btn" class="reserve-btn">
+                Reservar cita
+            </button>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const calendar = document.getElementById("calendar");
+            const timeSelect = document.getElementById("time-select");
+            const reasonSelect = document.getElementById("reason-select");
+            const reserveBtn = document.getElementById("reserve-btn");
+
+            // 🗓️ Cargar horarios disponibles según la fecha
+            calendar.addEventListener("change", async () => {
+                const date = calendar.value;
+                if (!date) return;
+
+                try {
+                    const res = await fetch(`/appointments/available?date=${date}`);
+                    const slots = await res.json();
+
+                    timeSelect.innerHTML = "";
+                    if (slots.length === 0) {
+                        const opt = document.createElement("option");
+                        opt.textContent = "No hay horarios disponibles";
+                        opt.disabled = true;
+                        timeSelect.appendChild(opt);
+                    } else {
+                        slots.forEach(time => {
+                            const opt = document.createElement("option");
+                            opt.value = time;
+                            opt.textContent = time;
+                            timeSelect.appendChild(opt);
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error al cargar horarios:", error);
+                }
+            });
+
+            // 🎯 Cargar motivos disponibles
+            async function loadReasons() {
+                try {
+                    const res = await fetch("/admin/reasons");
+                    const reasons = await res.json();
+
+                    reasonSelect.innerHTML = '<option disabled selected>Selecciona un motivo</option>';
+                    reasons.forEach(reason => {
+                        const opt = document.createElement("option");
+                        opt.value = reason;
+                        opt.textContent = reason;
+                        reasonSelect.appendChild(opt);
+                    });
+                } catch (error) {
+                    console.error("Error al cargar motivos:", error);
+                }
+            }
+
+            loadReasons();
+
+            // 📝 Reservar cita
+            reserveBtn.addEventListener("click", async () => {
+                const date = calendar.value;
+                const time = timeSelect.value;
+                const reason = reasonSelect.value;
+
+                if (!date || !time || !reason) {
+                    alert("Por favor, selecciona una fecha, hora y motivo.");
+                    return;
+                }
+
+                try {
+                    const res = await fetch("/appointments/create", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ date, time, reason }),
+                        credentials: "include"
+                    });
+
+                    const data = await res.json();
+                    alert(data.message || data.error || "Error al reservar cita.");
+                } catch (error) {
+                    console.error("Error al reservar cita:", error);
+                    alert("Error al conectar con el servidor.");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

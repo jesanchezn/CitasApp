@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Citas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <h1 class="logo">Sistema de Citas</h1>
+        <div class="nav-links">
+            <span class="user-greeting">Hola, {{ user.full_name }}</span>
+            <a href="/" class="nav-link">Calendario</a>
+            <form action="/users/logout" method="get">
+                <button type="submit" class="logout-btn">Cerrar sesión</button>
+            </form>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="card">
+            <h2 class="card-title">Mis Citas Reservadas</h2>
+
+            {% if appointments %}
+            <table class="appointments-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Motivo</th> <!-- ✅ Nueva columna -->
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cita in appointments %}
+                    <tr>
+                        <td>{{ cita.date }}</td>
+                        <td>{{ cita.time }}</td>
+                        <td>{{ cita.reason or "—" }}</td> <!-- ✅ Mostrar motivo o guion si está vacío -->
+                        <td>
+                            <form action="/appointments/cancel/{{ cita.id }}" method="post">
+                                <button type="submit" class="cancel-btn">Cancelar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% else %}
+            <p class="empty-message">No tienes citas reservadas.</p>
+            {% endif %}
+        </div>
+    </main>
+
+    <div id="flash" class="flash-message"></div>
+
+    <script>
+    document.querySelectorAll(".cancel-btn").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+            e.preventDefault();
+
+            if (!confirm("¿Seguro que quieres cancelar esta cita?")) return;
+
+            const form = btn.closest("form");
+            const url = form.action;
+
+            try {
+                const res = await fetch(url, {
+                    method: "POST",
+                    credentials: "include"
+                });
+
+                const data = await res.json();
+
+                // Mostrar mensaje visual
+                const flash = document.getElementById("flash");
+                flash.textContent = data.message;
+                flash.classList.add("show");
+                setTimeout(() => flash.classList.remove("show"), 3000);
+
+                // Eliminar la fila de la tabla
+                const row = btn.closest("tr");
+                row.remove();
+
+                // Si ya no hay citas, mostrar el mensaje vacío
+                const tbody = document.querySelector(".appointments-table tbody");
+                if (tbody.children.length === 0) {
+                    document.querySelector(".appointments-table").remove();
+                    const emptyMsg = document.createElement("p");
+                    emptyMsg.className = "empty-message";
+                    emptyMsg.textContent = "No tienes citas reservadas.";
+                    document.querySelector(".card").appendChild(emptyMsg);
+                }
+
+            } catch (err) {
+                alert("Error al cancelar la cita");
+                console.error(err);
+            }
+        });
+    });
+    </script>
+
+</body>
+</html>

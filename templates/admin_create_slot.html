@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <h1 class="logo">Sistema de Citas</h1>
+        <div class="nav-links">
+            <form action="/users/logout" method="get">
+                <button type="submit" class="logout-btn">
+                    Cerrar sesión
+                </button>
+            </form>
+        </div>
+    </nav>
+    
+    <main class="main-content">
+        <div class="card">
+            <h2 class="card-title">Panel de Administración</h2>
+    
+            <div class="form-section">
+                <h3>Crear Horario Disponible</h3>
+                <form id="slotForm" class="admin-form">
+                    <div class="form-group">
+                        <label for="date">Fecha:</label>
+                        <input type="date" name="date" id="date" required>
+                    </div>
+    
+                    <div class="form-group">
+                        <label for="time">Hora:</label>
+                        <input type="time" name="time" id="time" required>
+                    </div>
+    
+                    <button type="submit" class="btn btn-primary">Crear Cita Disponible</button>
+                </form>
+            </div>
+    
+            <div class="form-section">
+                <h3>Motivos de Cita</h3>
+                <form id="reasonForm" class="admin-form">
+                    <div class="form-group">
+                        <label for="newReason">Agregar nuevo motivo:</label>
+                        <input type="text" id="newReason" placeholder="Ej. Corte de cabello" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Agregar Motivo</button>
+                </form>
+                
+                <div class="list-container">
+                    <h4>Motivos disponibles</h4>
+                    <ul id="reasonsList"></ul>
+                </div>
+            </div>
+    
+            <div id="slotsContainer" class="admin-section" style="display:none;">
+                <h3 class="section-title">Horarios disponibles para <span id="selectedDate"></span></h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="slotsTableBody"></tbody>
+                </table>
+            </div>
+    
+            <div id="appointmentsContainer" class="admin-section" style="display:none;">
+                <h3 class="section-title">Citas reservadas para <span id="selectedDateAppointments"></span></h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Usuario</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointmentsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const dateInput = document.getElementById("date");
+        const slotsContainer = document.getElementById("slotsContainer");
+        const appointmentsContainer = document.getElementById("appointmentsContainer");
+        const slotsTableBody = document.getElementById("slotsTableBody");
+        const appointmentsTableBody = document.getElementById("appointmentsTableBody");
+        const selectedDateLabel = document.getElementById("selectedDate");
+        const selectedDateAppointmentsLabel = document.getElementById("selectedDateAppointments");
+        const reasonsList = document.getElementById("reasonsList");
+    
+        async function loadSlots(date) {
+            const res = await fetch("/admin/slots");
+            const slots = await res.json();
+            const filtered = slots.filter(s => s.date === date);
+    
+            slotsTableBody.innerHTML = "";
+            if (filtered.length === 0) {
+                slotsTableBody.innerHTML = "<tr><td colspan='2'>No hay horarios disponibles</td></tr>";
+            } else {
+                filtered.forEach(slot => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${slot.time}</td>
+                        <td>
+                            <button class="icon-btn delete-slot-btn" onclick="deleteSlot(${slot.id}, '${slot.date}')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    `;
+                    slotsTableBody.appendChild(row);
+                });
+            }
+    
+            selectedDateLabel.textContent = date;
+            slotsContainer.style.display = "block";
+        }
+    
+        async function loadAppointments(date) {
+            const res = await fetch("/admin/appointments");
+            const appointments = await res.json();
+            const filtered = appointments.filter(a => a.date === date);
+    
+            appointmentsTableBody.innerHTML = "";
+            if (filtered.length === 0) {
+                appointmentsTableBody.innerHTML = "<tr><td colspan='3'>No hay citas reservadas</td></tr>";
+            } else {
+                filtered.forEach(app => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${app.time}</td>
+                        <td>${app.user_name}</td>
+                        <td>${app.reason || "—"}</td>
+                    `;
+                    appointmentsTableBody.appendChild(row);
+                });
+            }
+    
+            selectedDateAppointmentsLabel.textContent = date;
+            appointmentsContainer.style.display = "block";
+        }
+    
+        async function deleteSlot(id, date) {
+            const confirmed = confirm("¿Estás seguro de que deseas eliminar este horario?");
+            if (!confirmed) return;
+    
+            const res = await fetch(`/admin/delete-slot/${id}`, {
+                method: "DELETE"
+            });
+    
+            const data = await res.json();
+    
+            if (res.ok) {
+                alert(data.message || "Horario eliminado");
+                loadSlots(date);
+            } else {
+                alert(data.detail || "Error al eliminar");
+            }
+        }
+    
+        async function loadReasons() {
+            const res = await fetch("/admin/reasons");
+            const reasons = await res.json();
+    
+            reasonsList.innerHTML = "";
+            reasons.forEach(name => {
+                const li = document.createElement("li");
+                li.textContent = name;
+                reasonsList.appendChild(li);
+            });
+        }
+    
+    
+        document.getElementById("slotForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+    
+            const formData = {
+                date: e.target.date.value,
+                time: e.target.time.value
+            };
+    
+            const res = await fetch("/admin/create-slot", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(formData),
+                credentials: "include"
+            });
+    
+            const data = await res.json();
+    
+            if (res.ok) {
+                alert(data.message || "Cita creada con éxito");
+                e.target.reset();
+                loadSlots(formData.date);
+            } else {
+                alert(data.detail || "Error al crear cita");
+            }
+        });
+    
+        document.getElementById("reasonForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+    
+            const name = document.getElementById("newReason").value.trim();
+            if (!name) return;
+    
+            const res = await fetch("/admin/add-reason", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ name }),
+                credentials: "include"
+            });
+    
+            const data = await res.json();
+    
+            if (res.ok) {
+                alert(data.message || "Motivo agregado");
+                document.getElementById("newReason").value = "";
+                loadReasons();
+            } else {
+                alert(data.detail || "Error al agregar motivo");
+            }
+        });
+    
+        dateInput.addEventListener("change", () => {
+            const date = dateInput.value;
+            if (date) {
+                loadSlots(date);
+                loadAppointments(date);
+            }
+        });
+    
+        loadReasons();
+    </script>
+</body>
+</html>

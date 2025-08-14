@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrarse</title>
+    <link href="/static/styles.css" rel="stylesheet">
+</head>
+<body class="login-body">
+
+    <form action="/users/register" method="post" class="login-form">
+        <h2 class="login-title">Registro</h2>
+
+        {% if message %}
+            {% set is_success = 'exitoso' in message or 'correctamente' in message %}
+            <div data-alert class="alert-message {{ 'alert-success' if is_success else 'alert-error' }}">
+                {{ message }}
+            </div>
+        {% endif %}
+
+
+        <div class="form-group">
+            <input type="text" name="full_name" placeholder="Nombre completo" required>
+        </div>
+        <div class="form-group">
+            <input type="text" name="username" placeholder="Usuario" required>
+        </div>
+        <div class="form-group">
+            <input type="email" name="email" placeholder="Correo" required>
+        </div>
+        <div class="form-group">
+            <input type="password" name="password" placeholder="Contraseña" required>
+        </div>
+
+        <button type="submit" class="btn btn-register">
+            Registrar
+        </button>
+
+        <p class="form-text">
+            ¿Ya tienes cuenta?
+            <a href="/users/login" class="link">Inicia sesión</a>
+        </p>
+    </form>
+    <script>
+        setTimeout(() => {
+            const alertBox = document.querySelector('[data-alert]');
+            if (alertBox) {
+                alertBox.style.opacity = '0';
+                setTimeout(() => alertBox.remove(), 500);
+        }
+    }, 3000);
+    </script>
+</body>
+</html>
