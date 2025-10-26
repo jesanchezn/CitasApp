@@ -1,6 +1,27 @@
-fastapi
-uvicorn
-sqlalchemy
-jinja2
-python-jose
-passlib[bcrypt]
+# --- Framework principal ---
+fastapi==0.115.0
+uvicorn[standard]==0.31.1
+
+# --- Base de datos ---
+sqlalchemy==2.0.35
+
+# --- Templates HTML ---
+jinja2==3.1.4
+
+# --- Autenticación y seguridad ---
+python-jose==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+itsdangerous==2.2.0
+
+# --- Validación de datos y correos ---
+pydantic[email]==2.9.2
+email-validator==2.2.0
+
+# --- Otros ---
+requests
+
+google-auth==2.25.0
+google-auth-oauthlib==1.1.0
+
+resend==0.1.0  # verifica la última versión en PyPI

@@ -14,22 +14,30 @@
             {% set is_logout = 'cerrada' in message or 'cerró' in message %}
             {% set is_success = 'exitoso' in message or 'correctamente' in message %}
             <div data-alert class="alert-message {{ 'alert-success' if is_success or is_logout else 'alert-error' }}">
-            {{ message }}
+                {{ message }}
             </div>
         {% endif %}
 
-
+        <!-- 📧 Campo de correo -->
         <div class="form-group">
             <input type="email" name="email" placeholder="Correo" required>
         </div>
 
+        <!-- 🔒 Campo de contraseña -->
         <div class="form-group">
             <input type="password" name="password" placeholder="Contraseña" required>
         </div>
 
-        <button type="submit" class="btn btn-primary">
-            Ingresar
-        </button>
+        <!-- 🔘 Botón de ingreso -->
+        <button type="submit" class="btn btn-primary">Ingresar</button>
+
+        <div class="divider">o</div>
+
+        <!-- 🔹 Botón de inicio con Google -->
+        <a href="/auth/login/google" class="btn btn-google">
+            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo">
+            <span>Iniciar sesión con Google</span>
+        </a>
 
         <p class="form-text">
             ¿No tienes cuenta?
@@ -38,13 +46,14 @@
     </form>
 
     <script>
+        // 🔔 Desaparecer mensajes después de 3 segundos
         setTimeout(() => {
             const alertBox = document.querySelector('[data-alert]');
             if (alertBox) {
                 alertBox.style.opacity = '0';
-                setTimeout(() => alertBox.remove(), 500); // lo elimina del DOM después de desvanecerse
+                setTimeout(() => alertBox.remove(), 500);
             }
-        }, 3000); // 3 segundos
+        }, 3000);
     </script>
 
 </body>

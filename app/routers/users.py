@@ -237,11 +237,22 @@ def my_appointments(
         return RedirectResponse(url="/users/login", status_code=302)
 
     citas = db.query(Appointment).filter(Appointment.user_id == current_user.id).all()
+
+    citas_con_motivo = []
+    for c in citas:
+        citas_con_motivo.append({
+            "id": c.id,
+            "date": c.date.strftime("%Y-%m-%d"),
+            "time": c.time.strftime("%H:%M"),
+            "reason": c.reason.name if c.reason else "Sin motivo"
+        })
+
     return templates.TemplateResponse("my_appointments.html", {
         "request": request,
-        "appointments": citas,
+        "appointments": citas_con_motivo,
         "user": current_user
     })
+
 
 
 # ------------------------------------------
@@ -255,3 +266,8 @@ def admin_create_slot_page(
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="No tienes permisos.")
     return templates.TemplateResponse("admin_create_slot.html", {"request": request})
+
+@router.get("/reasons")
+def get_public_reasons(db: Session = Depends(get_db)):
+    reasons = db.query(Reason).all()
+    return [{"id": r.id, "name": r.name} for r in reasons]

@@ -106,18 +106,26 @@ def list_slots(db: Session = Depends(get_db)):
 
 @router.get("/appointments")
 def list_appointments(db: Session = Depends(get_db)):
-    appointments = db.query(Appointment).join(Appointment.user).order_by(Appointment.date, Appointment.time).all()
+    appointments = (
+        db.query(Appointment)
+        .join(Appointment.user)
+        .outerjoin(Appointment.reason)
+        .order_by(Appointment.date, Appointment.time)
+        .all()
+    )
+
     return [
         {
             "id": a.id,
-            "user_id": a.user_id,
             "user_name": a.user.full_name,
             "date": a.date.strftime("%Y-%m-%d"),
             "time": a.time.strftime("%H:%M"),
-            "reason": a.reason
+            "reason_name": a.reason.name if a.reason else "Sin motivo"
         }
         for a in appointments
     ]
+
+
 
 
 
@@ -137,9 +145,9 @@ def delete_slot(slot_id: int, db: Session = Depends(get_db), user: User = Depend
 # ----- Obtener motivos disponibles para citas
 
 @router.get("/reasons")
-def get_available_reasons(db: Session = Depends(get_db)):
-    reasons = db.query(Reason).order_by(Reason.name).all()
-    return [r.name for r in reasons]
+def get_reasons(db: Session = Depends(get_db), current_user: User = Depends(verify_admin)):
+    reasons = db.query(Reason).all()
+    return [{"id": r.id, "name": r.name} for r in reasons]
 
 
 # Agregar motivo
@@ -154,6 +162,21 @@ def add_reason(reason: ReasonCreate, db: Session = Depends(get_db), user: User =
     db.commit()
     db.refresh(new_reason)
     return {"message": "Motivo agregado", "reason": new_reason.name}
+
+# Eliminar motivo
+
+@router.delete("/delete-reason/{reason_id}")
+def delete_reason(reason_id: int, db: Session = Depends(get_db), current_user: User = Depends(verify_admin)):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="No autorizado")
+
+    reason = db.query(Reason).filter(Reason.id == reason_id).first()
+    if not reason:
+        raise HTTPException(status_code=404, detail="Motivo no encontrado")
+
+    db.delete(reason)
+    db.commit()
+    return {"message": "Motivo eliminado correctamente"}
 
 
 

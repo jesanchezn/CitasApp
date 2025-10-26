@@ -1,6 +1,7 @@
 # app/schemas.py
 from pydantic import BaseModel, EmailStr
 from datetime import date, time
+from typing import Optional
 
 class UserCreate(BaseModel):
     full_name: str
@@ -24,7 +25,7 @@ class UserOut(BaseModel):
 class AppointmentCreate(BaseModel):
     date: str
     time: str
-    reason: str
+    reason: Optional[str] = None
 
 class AppointmentOut(BaseModel):
     id: int

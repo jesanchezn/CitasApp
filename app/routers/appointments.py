@@ -4,7 +4,7 @@ from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional
 from app.database import get_db
-from app.models import Appointment, AvailableSlot, User
+from app.models import Appointment, AvailableSlot, User, Reason
 from app.auth import get_current_user_from_cookie
 
 router = APIRouter()
@@ -81,6 +81,7 @@ def create_appointment(
     except ValueError:
         raise HTTPException(status_code=400, detail="Formato de fecha u hora inválido")
 
+    # Verificar si ya existe una cita en esa hora
     cita_existente = db.query(Appointment).filter(
         Appointment.date == date_obj,
         Appointment.time == time_obj
@@ -89,25 +90,37 @@ def create_appointment(
     if cita_existente:
         return {"error": "Horario no disponible"}
 
+    # Buscar el motivo (por id)
+    reason_obj = None
+    if appt.reason:  # 👈 Si viene el motivo, lo buscamos por ID o por nombre
+        reason_obj = db.query(Reason).filter(
+            (Reason.id == appt.reason) | (Reason.name == appt.reason)
+        ).first()
+        if not reason_obj:
+            raise HTTPException(status_code=404, detail="Motivo no encontrado")
+
+    # Crear la cita con el ID del motivo
     nueva_cita = Appointment(
         date=date_obj,
         time=time_obj,
         user_id=current_user.id,
-        reason=appt.reason  # 👈 guardar el motivo
+        reason_id=reason_obj.id if reason_obj else None
     )
+
     db.add(nueva_cita)
     db.commit()
     db.refresh(nueva_cita)
 
     return {
-        "message": "Cita creada Correctamente",
+        "message": "Cita creada correctamente",
         "appointment": {
             "date": appt.date,
             "time": appt.time,
-            "reason": appt.reason,
+            "reason": reason_obj.name if reason_obj else "Sin motivo",
             "user": current_user.full_name
         }
     }
+
 
 
 @router.post("/cancel/{appointment_id}")
