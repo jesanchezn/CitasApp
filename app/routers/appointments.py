@@ -6,6 +6,8 @@ from typing import Optional
 from app.database import get_db
 from app.models import Appointment, AvailableSlot, User, Reason
 from app.auth import get_current_user_from_cookie
+from app.core.email_utils import send_email   # 👈 Nuevo import
+import asyncio                                 # 👈 Para enviar el correo en segundo plano
 
 router = APIRouter()
 
@@ -18,6 +20,7 @@ class AppointmentCreate(BaseModel):
     date: str
     time: str
     reason: Optional[str] = None  # 👈 motivo de la cita
+
 
 # 1️⃣ ADMIN — Agregar un horario disponible
 @router.post("/add-slot")
@@ -37,6 +40,7 @@ def add_available_slot(slot: SlotCreate, db: Session = Depends(get_db)):
         "message": "Horario agregado",
         "slot": {"date": slot.date, "time": slot.time}
     }
+
 
 # 2️⃣ Usuario — Obtener horarios libres para una fecha
 @router.get("/available")
@@ -68,9 +72,10 @@ def get_available_slots(date: str, db: Session = Depends(get_db)):
 
     return horas_libres
 
+
 # 3️⃣ Usuario — Crear una cita (usando token)
 @router.post("/create")
-def create_appointment(
+async def create_appointment(
     appt: AppointmentCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user_from_cookie)
@@ -92,7 +97,7 @@ def create_appointment(
 
     # Buscar el motivo (por id)
     reason_obj = None
-    if appt.reason:  # 👈 Si viene el motivo, lo buscamos por ID o por nombre
+    if appt.reason:
         reason_obj = db.query(Reason).filter(
             (Reason.id == appt.reason) | (Reason.name == appt.reason)
         ).first()
@@ -111,6 +116,20 @@ def create_appointment(
     db.commit()
     db.refresh(nueva_cita)
 
+    # ✅ Enviar correo al usuario (en segundo plano)
+    subject = "Confirmación de tu cita"
+    body = f"""
+    <h3>Hola {current_user.full_name} 👋</h3>
+    <p>Tu cita ha sido agendada correctamente.</p>
+    <p><b>Fecha:</b> {appt.date}<br>
+    <b>Hora:</b> {appt.time}</p>
+    <p><b>Motivo:</b> {reason_obj.name if reason_obj else "Sin motivo"}</p>
+    <p>Por favor llega 10 minutos antes de tu cita. ¡Nos vemos pronto!</p>
+    """
+
+    # Enviar el correo sin bloquear la respuesta
+    asyncio.create_task(send_email(current_user.email, subject, body))
+
     return {
         "message": "Cita creada correctamente",
         "appointment": {
@@ -120,7 +139,6 @@ def create_appointment(
             "user": current_user.full_name
         }
     }
-
 
 
 @router.post("/cancel/{appointment_id}")

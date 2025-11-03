@@ -18,10 +18,17 @@ itsdangerous==2.2.0
 pydantic[email]==2.9.2
 email-validator==2.2.0
 
-# --- Otros ---
-requests
+# --- Variables de entorno y configuración ---
+python-dotenv==1.0.1
+python-decouple==3.8
 
+# --- Envío de correos ---
+aiosmtplib==3.0.1
+
+# --- Otros ---
+requests==2.32.3
+
+# --- Integraciones externas (Google y Resend) ---
 google-auth==2.25.0
 google-auth-oauthlib==1.1.0
-
-resend==0.1.0  # verifica la última versión en PyPI
+resend==0.1.0  # Puedes actualizar si hay una versión más reciente

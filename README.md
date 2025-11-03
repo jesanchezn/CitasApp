@@ -66,5 +66,10 @@ uvicorn app.main:app --reload
 
 https://localhost:8000/docs
 
+usuario admin para ver la administración de las citas
+
+admin@gmail.com
+clave: 123456
+
 
 ```bash

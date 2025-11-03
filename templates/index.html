@@ -56,7 +56,11 @@
         calendar.addEventListener("change", async () => {
           const date = calendar.value;
           if (!date) return;
+          await loadAvailableTimes(date);
+        });
 
+        // 🔁 Función para cargar horarios disponibles
+        async function loadAvailableTimes(date) {
           try {
             const res = await fetch(`/appointments/available?date=${date}`);
             const slots = await res.json();
@@ -68,6 +72,12 @@
               opt.disabled = true;
               timeSelect.appendChild(opt);
             } else {
+              const defaultOpt = document.createElement("option");
+              defaultOpt.disabled = true;
+              defaultOpt.selected = true;
+              defaultOpt.textContent = "Selecciona una hora";
+              timeSelect.appendChild(defaultOpt);
+
               slots.forEach((time) => {
                 const opt = document.createElement("option");
                 opt.value = time;
@@ -78,7 +88,7 @@
           } catch (error) {
             console.error("Error al cargar horarios:", error);
           }
-        });
+        }
 
         // 🎯 Cargar motivos disponibles
         async function loadReasons() {
@@ -86,7 +96,6 @@
             const res = await fetch("/reasons");
             const reasons = await res.json();
 
-            const reasonSelect = document.getElementById("reason-select"); // ← esta línea es clave
             reasonSelect.innerHTML =
               "<option disabled selected>Selecciona un motivo</option>";
 
@@ -94,7 +103,7 @@
               const option = document.createElement("option");
               option.value = reason.id;
               option.textContent = reason.name;
-              reasonSelect.appendChild(option); // ← aquí estaba el error
+              reasonSelect.appendChild(option);
             });
           } catch (error) {
             console.error("Error al cargar motivos:", error);
@@ -123,7 +132,20 @@
             });
 
             const data = await res.json();
-            alert(data.message || data.error || "Error al reservar cita.");
+
+            if (res.ok && data.message) {
+              alert(
+                "✅ Cita agendada correctamente.\n📧 Se ha enviado una confirmación a tu correo."
+              );
+
+              // Limpiar selección
+              calendar.value = "";
+              timeSelect.innerHTML =
+                '<option disabled selected>Selecciona una hora</option>';
+              reasonSelect.selectedIndex = 0;
+            } else {
+              alert(data.error || "Error al reservar cita.");
+            }
           } catch (error) {
             console.error("Error al reservar cita:", error);
             alert("Error al conectar con el servidor.");
